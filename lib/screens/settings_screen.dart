@@ -11,7 +11,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String _baseUrl = "http://10.0.2.2:3002"; // Default base URL
+  String _baseUrl = "https://solar-iot-be.vercel.app"; // Default base URL
   final TextEditingController _controller = TextEditingController();
 
   @override
