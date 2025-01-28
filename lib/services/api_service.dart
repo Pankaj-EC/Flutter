@@ -12,7 +12,7 @@ class ApiService {
 
   Future<void> _initializeBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    _baseUrl = prefs.getString('base_url') ?? 'http://10.0.2.2:3002'; // Default value
+    _baseUrl = prefs.getString('base_url') ?? 'https://solar-iot-be.vercel.app'; // Default value
     print("URL"+_baseUrl!);
   }
   
