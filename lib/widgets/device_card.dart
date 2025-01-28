@@ -6,8 +6,7 @@ class DeviceCard extends StatefulWidget {
   final Device device;
   final bool isDarkMode;
 
-  const DeviceCard({Key? key, required this.device, required this.isDarkMode})
-      : super(key: key);
+  const DeviceCard({super.key, required this.device, required this.isDarkMode});
 
   @override
   _DeviceCardState createState() => _DeviceCardState();
@@ -59,12 +58,12 @@ class _DeviceCardState extends State<DeviceCard> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  Text('Last Day Data:'),
+                  const Text('Last Day Data:'),
                   // Display last day data here (you can fetch it from the API)
                   // For example, you can call /deviceData with count 10
                   // and display the results in a ListView or similar widget
                   // Placeholder for last day data
-                  Text('Data for last day: ...'),
+                  const Text('Data for last day: ...'),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
