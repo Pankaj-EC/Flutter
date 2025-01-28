@@ -537,10 +537,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 child: Column(
                   children: [
                     _buildSolarReadingTile(
-                        '9:00 AM', pinnedDeviceData!['SV9AM'].toString()),
+                        '9:00 AM', '${pinnedDeviceData!['SV9AM'].toString()}V'),  //'${pinnedDeviceData!['battery_Von']}V'
                     const SizedBox(height: 12),
                     _buildSolarReadingTile(
-                        '12:00 PM', pinnedDeviceData!['SV12PM'].toString()),
+                        '12:00 PM', '${pinnedDeviceData!['SV12PM'].toString()}V'),  //'${pinnedDeviceData!['battery_Von']}V'
                   ],
                 ),
               ),
@@ -549,10 +549,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 child: Column(
                   children: [
                     _buildSolarReadingTile(
-                        '3:00 PM', pinnedDeviceData!['SV3PM'].toString()),
+                        '3:00 PM', '${pinnedDeviceData!['SV3PM'].toString()}V'),
                     const SizedBox(height: 12),
                     _buildSolarReadingTile(
-                        '6:00 PM', pinnedDeviceData!['SV6PM'].toString()),
+                        '6:00 PM', '${pinnedDeviceData!['SV6PM'].toString()}V'),
                   ],
                 ),
               ),
