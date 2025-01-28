@@ -1,17 +1,36 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../models/device.dart';
 
 class ApiService {
-  // Use the appropriate IP address based on your testing environment
-  final String baseUrl = 'http://10.0.2.2:3002'; // For Android Emulator
-  // final String baseUrl = 'http://192.168.x.x:3002'; // For Physical Device (replace with your machine's IP)
-  // final String baseUrl = 'http://localhost:3002'; // For iOS Simulator
+  String? _baseUrl;
+
+  ApiService() {
+    _initializeBaseUrl();
+  }
+
+  Future<void> _initializeBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    _baseUrl = prefs.getString('base_url') ?? 'http://10.0.2.2:3002'; // Default value
+    print("URL"+_baseUrl!);
+  }
+  
+
+  Future<String> getBaseUrl() async {
+    if (_baseUrl == null) {
+      await _initializeBaseUrl();
+    }
+    return _baseUrl!;
+  }
 
   Future<List<Device>> getDevices() async {
-    final response = await http.post(Uri.parse('$baseUrl/getDevices'),
-        body: jsonEncode({'device_ids': 'ALL'}),
-        headers: {'Content-Type': 'application/json'});
+    final baseUrl = await getBaseUrl();
+    final response = await http.post(
+      Uri.parse('$baseUrl/getDevices'),
+      body: jsonEncode({'device_ids': 'ALL'}),
+      headers: {'Content-Type': 'application/json'},
+    );
 
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = json.decode(response.body);
@@ -22,6 +41,7 @@ class ApiService {
   }
 
   Future<List<dynamic>> getDeviceData(String deviceId, int count) async {
+    final baseUrl = await getBaseUrl();
     final response = await http.post(
       Uri.parse('$baseUrl/getDevicesData'),
       body: jsonEncode({'device_id': deviceId, 'count': count}),
@@ -36,6 +56,7 @@ class ApiService {
   }
 
   Future<void> updateDevice(String deviceId, bool status) async {
+    final baseUrl = await getBaseUrl();
     final response = await http.post(
       Uri.parse('$baseUrl/updateDevice'),
       body: jsonEncode({'device_id': deviceId, 'status': status}),

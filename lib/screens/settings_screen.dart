@@ -1,7 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
-class SettingsScreen extends StatelessWidget {
+
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  String _baseUrl = "http://10.0.2.2:3002"; // Default base URL
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBaseUrl();
+  }
+
+  // Load saved base URL from shared preferences
+  Future<void> _loadBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _baseUrl = prefs.getString('base_url') ?? _baseUrl;
+      _controller.text = _baseUrl; // Set initial value for TextField
+    });
+  }
+
+Future<void> _saveBaseUrl() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('base_url', _controller.text);
+
+  setState(() {
+    _baseUrl = _controller.text;
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Base URL updated successfully! app will restart in 2 seconds')),
+  );
+
+  // Delay for the SnackBar to display and then restart the app
+  await Future.delayed(const Duration(seconds: 2));
+
+  // Exit the app
+  SystemNavigator.pop();
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -14,90 +60,59 @@ class SettingsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          _buildSettingCard(
-            'App Settings',
-            [
-              _buildSettingTile(
-                'Notifications',
-                'Manage notification preferences',
-                Icons.notifications_outlined,
-                onTap: () {
-                  // Add notification settings logic
-                },
-              ),
-              _buildSettingTile(
-                'Theme',
-                'Change app appearance',
-                Icons.palette_outlined,
-                onTap: () {
-                  // Add theme settings logic
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSettingCard(
-            'Data Settings',
-            [
-              _buildSettingTile(
-                'Data Refresh',
-                'Configure auto-refresh interval',
-                Icons.refresh,
-                onTap: () {
-                  // Add refresh settings logic
-                },
-              ),
-              _buildSettingTile(
-                'Storage',
-                'Manage local data storage',
-                Icons.storage_outlined,
-                onTap: () {
-                  // Add storage settings logic
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingCard(String title, List<Widget> children) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              title,
-              style: const TextStyle(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Base URL',
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          ...children,
-        ],
+            const SizedBox(height: 8),
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                labelText: 'Enter Base URL',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: const Icon(Icons.link, color: Colors.green),
+              ),
+            ),
+            const SizedBox(height: 16),
+           ElevatedButton(
+  onPressed: _saveBaseUrl,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.green[700], // Button background color
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8), // Rounded corners
+    ),
+  ),
+  child: const Text(
+    'Save',
+    style: TextStyle(
+      color: Colors.white, // Set text color to white
+      fontWeight: FontWeight.bold, // Optional: Make text bold
+    ),
+  ),
+),
+            const SizedBox(height: 16),
+            const Divider(thickness: 1),
+            const SizedBox(height: 16),
+            Text(
+              'Current Base URL: $_baseUrl',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildSettingTile(String title, String subtitle, IconData icon,
-      {VoidCallback? onTap}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.green[700]),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }
