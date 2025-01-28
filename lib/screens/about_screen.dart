@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
@@ -7,7 +8,7 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About'),
+        title: const Text('About Us'),
         backgroundColor: Colors.green[700],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -19,36 +20,37 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 24),
+             Image.asset(
+                    'assets/company_icon.png',
+                    width: 500,
+                    height: 100,
+                  ),
+            // Logo and Company Name Section
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green[50],
-                shape: BoxShape.circle,
+                color: const Color.fromARGB(255, 253, 253, 253),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
               ),
-              child: Icon(
-                Icons.devices,
-                size: 64,
-                color: Colors.green[700],
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    'Transform Your Ideas Into Reality With Our Innovation',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Device Management System',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Version 1.0.0',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 32),
+
+            // Information Cards
             _buildInfoCard(
               'About the App',
               'This application helps you monitor and manage your devices efficiently. Track device status, battery levels, and solar readings in real-time.',
@@ -66,6 +68,10 @@ class AboutScreen extends StatelessWidget {
               'Read our terms of service and privacy policy.',
               Icons.privacy_tip_outlined,
             ),
+            const SizedBox(height: 32),
+
+            // Footer Section
+            _buildFooter(),
           ],
         ),
       ),
@@ -74,9 +80,9 @@ class AboutScreen extends StatelessWidget {
 
   Widget _buildInfoCard(String title, String description, IconData icon) {
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -85,12 +91,12 @@ class AboutScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.green[700]),
-                const SizedBox(width: 8),
+                Icon(icon, color: Colors.green[700], size: 28),
+                const SizedBox(width: 12),
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -100,13 +106,55 @@ class AboutScreen extends StatelessWidget {
             Text(
               description,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+                fontSize: 16,
+                color: Colors.grey[700],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Column(
+      children: [
+        const Divider(thickness: 1.5),
+        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () async {
+            const url = 'https://devamjyot.com/';
+            if (await canLaunchUrl(Uri.parse(url))) {
+              await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+            } else {
+              throw 'Could not launch $url';
+            }
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Visit our website',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.open_in_new, color: Colors.blue, size: 18),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          '© 2025 Devam Jyot Solutions',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 }

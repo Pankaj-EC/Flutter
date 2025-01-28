@@ -345,8 +345,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(Icons.devices, color: Colors.white),
-                      const SizedBox(width: 8),
+                      // const Icon(Icons.devices, color: Colors.white),
+                      // const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Device ID: ${pinnedDeviceId}',
@@ -613,6 +613,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             const Icon(
               Icons.solar_power,
               size: 28,
+              color: Color.fromARGB(255, 241, 180, 12),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -620,6 +621,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
+                color: Colors.white,
               ),
             ),
           ],
