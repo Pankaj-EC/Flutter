@@ -229,6 +229,21 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     );
   }
 
+  Future<void> refreshAllData() async {
+    try {
+      // Refresh pinned device data if exists
+      if (pinnedDeviceId != null) {
+        await fetchPinnedDeviceData(pinnedDeviceId!);
+      }
+      // Refresh device list
+      await refreshDeviceList();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to refresh data: ${e.toString()}')),
+      );
+    }
+  }
+
   Widget buildPinnedDeviceTile() {
     if (pinnedDeviceData == null) {
       return Container(
@@ -291,6 +306,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       );
     }
 
+    final date = DateTime.parse(pinnedDeviceData!['date']).toLocal();
+    final formattedDate = "${date.day}/${date.month}/${date.year}";
+
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -322,28 +340,35 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.devices, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Device ID: ${pinnedDeviceId}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.devices, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Device ID: ${pinnedDeviceId}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.refresh, color: Colors.white),
                       onPressed: () => fetchPinnedDeviceData(pinnedDeviceId!),
+                      tooltip: 'Refresh Data',
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => togglePin(pinnedDeviceId!),
+                      tooltip: 'Unpin Device',
                     ),
                   ],
                 ),
@@ -355,13 +380,20 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Latest Data',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today,
+                        size: 16, color: Colors.green[700]),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Data for $formattedDate',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -398,40 +430,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildDataCard(
-                  'Solar Voltage Readings',
-                  [
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _buildDataRow(
-                                '9 AM',
-                                '${pinnedDeviceData!['SV9AM']}',
-                                Icons.wb_sunny)),
-                        Expanded(
-                            child: _buildDataRow(
-                                '12 PM',
-                                '${pinnedDeviceData!['SV12PM']}',
-                                Icons.wb_sunny)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _buildDataRow(
-                                '3 PM',
-                                '${pinnedDeviceData!['SV3PM']}',
-                                Icons.wb_sunny)),
-                        Expanded(
-                            child: _buildDataRow(
-                                '6 PM',
-                                '${pinnedDeviceData!['SV6PM']}',
-                                Icons.wb_sunny)),
-                      ],
-                    ),
-                  ],
-                ),
+                _buildSolarVoltageCard(),
               ],
             ),
           ),
@@ -500,48 +499,183 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     );
   }
 
+  Widget _buildSolarVoltageCard() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.solar_power, color: Colors.green[700]),
+              const SizedBox(width: 8),
+              Text(
+                'Solar Voltage Readings',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green[700],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildSolarReadingTile(
+                        '9:00 AM', pinnedDeviceData!['SV9AM'].toString()),
+                    const SizedBox(height: 12),
+                    _buildSolarReadingTile(
+                        '12:00 PM', pinnedDeviceData!['SV12PM'].toString()),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildSolarReadingTile(
+                        '3:00 PM', pinnedDeviceData!['SV3PM'].toString()),
+                    const SizedBox(height: 12),
+                    _buildSolarReadingTile(
+                        '6:00 PM', pinnedDeviceData!['SV6PM'].toString()),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSolarReadingTile(String time, String value) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.green[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.green[100]!),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.wb_sunny, size: 16, color: Colors.orange[700]),
+              const SizedBox(width: 8),
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.green[700],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Devices'),
         backgroundColor: Colors.green[700],
-        elevation: 0,
-        title: Row(
-          children: [
-            Icon(Icons.wb_sunny, size: 30, color: Colors.yellow),
-            const SizedBox(width: 8),
-            const Text('Solar Streetlight Tracker'),
-          ],
-        ),
       ),
-      body: Column(
-        children: [
-          buildPinnedDeviceTile(),
-          Expanded(
-            child: FutureBuilder<List<Device>>(
-              future: futureDevices,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
+      body: RefreshIndicator(
+        onRefresh: refreshAllData,
+        child: Column(
+          children: [
+            buildPinnedDeviceTile(),
+            Expanded(
+              child: FutureBuilder<List<Device>>(
+                future: futureDevices,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline,
+                              size: 48, color: Colors.red[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error loading devices: ${snapshot.error}',
+                            style: TextStyle(color: Colors.grey[600]),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.devices,
+                              size: 48, color: Colors.grey[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No devices found',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   final devices = snapshot.data!;
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
                     itemCount: devices.length,
                     itemBuilder: (context, index) {
+                      if (index >= devices.length) {
+                        return null;
+                      }
                       final device = devices[index];
-                      final isPinned = device.deviceId == pinnedDeviceId;
-
-                      return _buildDeviceCard(device, isPinned);
+                      return _buildDeviceCard(
+                        device,
+                        pinnedDeviceId == device.deviceId,
+                      );
                     },
                   );
-                }
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
