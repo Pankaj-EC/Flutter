@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../models/device.dart';
 import 'device_detail_screen.dart';
+import '../screens/settings_screen.dart';
+import '../screens/about_screen.dart';
 
 class DeviceListScreen extends StatefulWidget {
   const DeviceListScreen({super.key});
@@ -536,11 +538,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    _buildSolarReadingTile(
-                        '9:00 AM', '${pinnedDeviceData!['SV9AM'].toString()}V'),  //'${pinnedDeviceData!['battery_Von']}V'
+                    _buildSolarReadingTile('9:00 AM',
+                        '${pinnedDeviceData!['SV9AM'].toString()}V'), //'${pinnedDeviceData!['battery_Von']}V'
                     const SizedBox(height: 12),
-                    _buildSolarReadingTile(
-                        '12:00 PM', '${pinnedDeviceData!['SV12PM'].toString()}V'),  //'${pinnedDeviceData!['battery_Von']}V'
+                    _buildSolarReadingTile('12:00 PM',
+                        '${pinnedDeviceData!['SV12PM'].toString()}V'), //'${pinnedDeviceData!['battery_Von']}V'
                   ],
                 ),
               ),
@@ -605,9 +607,78 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Devices'),
+        leading: null,
+        title: Row(
+          children: [
+            const Icon(
+              Icons.solar_power,
+              size: 28,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'SOLAR IOT',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Colors.green[700],
+        elevation: 2,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              size: 28,
+              color: Colors.white,
+            ),
+            onSelected: (value) {
+              switch (value) {
+                case 'settings':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                  break;
+                case 'about':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutScreen(),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Settings'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'about',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('About'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+      drawer: null,
       body: RefreshIndicator(
         onRefresh: refreshAllData,
         child: Column(
