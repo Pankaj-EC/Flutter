@@ -24,6 +24,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   final ScrollController _horizontalController = ScrollController();
   final ScrollController _verticalController = ScrollController();
   final ScrollController _headerScrollController = ScrollController();
+  bool isTableView = false; // Add this line for view toggle state
 
   @override
   void initState() {
@@ -167,6 +168,36 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               ],
             ),
           ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              border: Border(
+                top: BorderSide(color: Colors.grey[200]!),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Table View',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Switch(
+                  value: isTableView,
+                  onChanged: (value) {
+                    setState(() => isTableView = value);
+                  },
+                  activeColor: Colors.green[700],
+                  activeTrackColor: Colors.green[200],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -174,7 +205,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Widget _buildDataTable() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -189,7 +220,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       ),
       child: Column(
         children: [
-          // Headers with synchronized scroll
           Container(
             decoration: BoxDecoration(
               color: Colors.green[700],
@@ -202,108 +232,104 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               controller: _headerScrollController,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: const [
-                  _HeaderCell('📅 Date', width: 130),
-                  _HeaderCell('⏰ On Time', width: 110),
-                  _HeaderCell('🔋 Battery On', width: 110),
-                  _HeaderCell('⏰ Off Time', width: 110),
-                  _HeaderCell('🔋 Battery Off', width: 110),
-                  _HeaderCell('📊 SV 9 AM', width: 110),
-                  _HeaderCell('📊 SV 12 PM', width: 110),
-                  _HeaderCell('📊 SV 3 PM', width: 110),
-                  _HeaderCell('📊 SV 6 PM', width: 110),
-                ],
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 610), // Sum of all column widths
+                child: Row(
+                  children: const [
+                    _HeaderCell('Date', width: 90),
+                    _HeaderCell('On', width: 70),
+                    _HeaderCell('B.On', width: 70),
+                    _HeaderCell('Off', width: 70),
+                    _HeaderCell('B.Off', width: 70),
+                    _HeaderCell('9AM', width: 60),
+                    _HeaderCell('12PM', width: 60),
+                    _HeaderCell('3PM', width: 60),
+                    _HeaderCell('6PM', width: 60),
+                  ],
+                ),
               ),
             ),
           ),
-          // Data rows with synchronized scroll
           Expanded(
             child: SingleChildScrollView(
               controller: _verticalController,
-              physics: const BouncingScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               child: SingleChildScrollView(
                 controller: _horizontalController,
                 scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: deviceData.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final data = entry.value;
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: index.isEven ? Colors.grey[50] : Colors.white,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.grey[200]!,
-                            width: 0.5,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 610), // Same as header
+                  child: Column(
+                    children: deviceData.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final data = entry.value;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: index.isEven ? Colors.grey[50] : Colors.white,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.grey[200]!,
+                              width: 0.5,
+                            ),
                           ),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          _DataCell(
-                            data['date'].split('T')[0],
-                            width: 130,
-                            isDate: true,
-                            icon: Icons.calendar_today,
-                          ),
-                          _DataCell(
-                            data['on_Time'],
-                            width: 110,
-                            isTime: true,
-                            icon: Icons.access_time,
-                            color: Colors.green[700],
-                          ),
-                          _DataCell(
-                            '${data['battery_Von']}V',
-                            width: 110,
-                            isBattery: true,
-                            icon: Icons.battery_charging_full,
-                            color: Colors.blue[700],
-                          ),
-                          _DataCell(
-                            data['off_Time'],
-                            width: 110,
-                            isTime: true,
-                            icon: Icons.access_time_filled,
-                            color: Colors.orange[700],
-                          ),
-                          _DataCell(
-                            '${data['battery_Voff']}V',
-                            width: 110,
-                            isBattery: true,
-                            icon: Icons.battery_alert,
-                            color: Colors.red[700],
-                          ),
-                          _DataCell(
-                            data['SV9AM'].toString(),
-                            width: 110,
-                            icon: Icons.show_chart,
-                            color: Colors.purple[700],
-                          ),
-                          _DataCell(
-                            data['SV12PM'].toString(),
-                            width: 110,
-                            icon: Icons.show_chart,
-                            color: Colors.purple[700],
-                          ),
-                          _DataCell(
-                            data['SV3PM'].toString(),
-                            width: 110,
-                            icon: Icons.show_chart,
-                            color: Colors.purple[700],
-                          ),
-                          _DataCell(
-                            data['SV6PM'].toString(),
-                            width: 110,
-                            icon: Icons.show_chart,
-                            color: Colors.purple[700],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        child: Row(
+                          children: [
+                            _DataCell(
+                              data['date'].split('T')[0],
+                              width: 90,
+                              isDate: true,
+                            ),
+                            _DataCell(
+                              data['on_Time'],
+                              width: 70,
+                              isTime: true,
+                              color: Colors.green[700],
+                            ),
+                            _DataCell(
+                              '${data['battery_Von']}V',
+                              width: 70,
+                              isBattery: true,
+                              color: Colors.blue[700],
+                            ),
+                            _DataCell(
+                              data['off_Time'],
+                              width: 70,
+                              isTime: true,
+                              color: Colors.orange[700],
+                            ),
+                            _DataCell(
+                              '${data['battery_Voff']}V',
+                              width: 70,
+                              isBattery: true,
+                              color: Colors.red[700],
+                            ),
+                            _DataCell(
+                              data['SV9AM'].toString(),
+                              width: 60,
+                              color: Colors.purple[700],
+                            ),
+                            _DataCell(
+                              data['SV12PM'].toString(),
+                              width: 60,
+                              color: Colors.purple[700],
+                            ),
+                            _DataCell(
+                              data['SV3PM'].toString(),
+                              width: 60,
+                              color: Colors.purple[700],
+                            ),
+                            _DataCell(
+                              data['SV6PM'].toString(),
+                              width: 60,
+                              color: Colors.purple[700],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
@@ -311,7 +337,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           if (deviceData.length % 10 == 0 && deviceData.isNotEmpty)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(color: Colors.grey[200]!),
@@ -328,23 +354,27 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                       },
                 icon: isLoading
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 16,
+                        height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Icon(Icons.refresh),
-                label: Text(isLoading ? 'Loading...' : 'Load More Data'),
+                    : const Icon(Icons.refresh, size: 16),
+                label: Text(
+                  isLoading ? 'Loading...' : 'Load More',
+                  style: const TextStyle(fontSize: 12),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  minimumSize: const Size(120, 32),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
               ),
@@ -352,6 +382,171 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildDataCard(Map<String, dynamic> data) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
+                const SizedBox(width: 8),
+                Text(
+                  data['date'].split('T')[0],
+                  style: TextStyle(
+                    color: Colors.green[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildCardRow('On Time', data['on_Time'], Icons.access_time, Colors.green[700]!),
+                _buildCardRow('Battery On', '${data['battery_Von']}V', Icons.battery_charging_full, Colors.blue[700]!),
+                _buildCardRow('Off Time', data['off_Time'], Icons.access_time_filled, Colors.orange[700]!),
+                _buildCardRow('Battery Off', '${data['battery_Voff']}V', Icons.battery_alert, Colors.red[700]!),
+                _buildCardRow('SV 9 AM', data['SV9AM'].toString(), Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 12 PM', data['SV12PM'].toString(), Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 3 PM', data['SV3PM'].toString(), Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 6 PM', data['SV6PM'].toString(), Icons.show_chart, Colors.purple[700]!),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardRow(String label, String value, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataView() {
+    if (deviceData.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning_rounded,
+                size: 64, color: Colors.orange[300]),
+            const SizedBox(height: 16),
+            const Text(
+              '📅 No Data Available',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check back later',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!isTableView) {
+      return ListView.builder(
+        padding: const EdgeInsets.only(top: 8, bottom: 16),
+        itemCount: deviceData.length + (deviceData.length % 10 == 0 ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == deviceData.length) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ElevatedButton.icon(
+                onPressed: isLoading ? null : () {
+                  setState(() => dataCount += 10);
+                  fetchDeviceData();
+                },
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.refresh),
+                label: Text(isLoading ? 'Loading...' : 'Load More Data'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green[700],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            );
+          }
+          return _buildDataCard(deviceData[index]);
+        },
+      );
+    }
+
+    return _buildDataTable();
   }
 
   @override
@@ -370,36 +565,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       body: Column(
         children: [
           _buildStatusCard(),
-          Expanded(
-            child: deviceData.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.warning_rounded,
-                            size: 64, color: Colors.orange[300]),
-                        const SizedBox(height: 16),
-                        const Text(
-                          '📅 No Data Available',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please check back later',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : _buildDataTable(),
-          ),
+          Expanded(child: _buildDataView()),
         ],
       ),
     );
@@ -416,7 +582,7 @@ class _HeaderCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
         border: Border(
           right: BorderSide(color: Colors.green[600]!, width: 0.5),
@@ -427,7 +593,7 @@ class _HeaderCell extends StatelessWidget {
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontSize: 12,
         ),
         textAlign: TextAlign.center,
       ),
@@ -458,7 +624,7 @@ class _DataCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
         border: Border(
           right: BorderSide(color: Colors.grey[200]!, width: 0.5),
@@ -474,7 +640,7 @@ class _DataCell extends StatelessWidget {
             text,
             style: TextStyle(
               color: color ?? Colors.grey[800],
-              fontSize: 13,
+              fontSize: 11,
               fontWeight: isDate || isTime || isBattery
                   ? FontWeight.w500
                   : FontWeight.normal,
