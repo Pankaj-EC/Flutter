@@ -43,20 +43,42 @@ class ApiService {
 
   // Helper method for sending HTTP requests with a timeout
   Future<http.Response> _sendRequest(Uri uri, String body) async {
+    final client = http.Client();
     try {
-      final response = await http.post(
-        uri,
-        body: body,
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15)); // Add timeout to avoid indefinite waiting
+      // Add retry mechanism
+      int maxRetries = 3;
+      int currentTry = 0;
+      
+      while (currentTry < maxRetries) {
+        try {
+          final response = await client.post(
+            uri,
+            body: body,
+            headers: {
+              'Content-Type': 'application/json',
+              'Connection': 'keep-alive',
+            },
+          ).timeout(const Duration(seconds: 15));
 
-      return response;
-    } on TimeoutException catch (_) {
-      throw Exception('Request timed out');
-    } on SocketException catch (_) {
-      throw Exception('No internet connection');
-    } on HttpException catch (_) {
-      throw Exception('Failed to load data from the server');
+          return response;
+        } catch (e) {
+          currentTry++;
+          if (currentTry == maxRetries) rethrow;
+          // Wait before retrying
+          await Future.delayed(Duration(seconds: currentTry));
+        }
+      }
+      throw Exception('Failed after $maxRetries retries');
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception('Network error: Please check your internet connection');
+      } else if (e is TimeoutException) {
+        throw Exception('Request timed out: Please try again');
+      } else {
+        throw Exception('Error: ${e.toString()}');
+      }
+    } finally {
+      client.close();
     }
   }
 
