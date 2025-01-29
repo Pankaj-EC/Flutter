@@ -4,6 +4,24 @@ import 'package:url_launcher/url_launcher.dart';
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
 
+  Future<void> _launchURL(BuildContext context) async {
+    final Uri url = Uri.parse('https://devamjyot.com');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $url');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to open website. Please try again later.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,34 +139,32 @@ class AboutScreen extends StatelessWidget {
       children: [
         const Divider(thickness: 1.5),
         const SizedBox(height: 16),
-        GestureDetector(
-          onTap: () async {
-            const url = 'https://devamjyot.com/';
-            if (await canLaunchUrl(Uri.parse(url))) {
-              await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch $url';
-            }
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Visit our website',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
+        Builder(
+          builder: (context) => InkWell(
+            onTap: () => _launchURL(context),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'Visit our website',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.open_in_new, color: Colors.blue, size: 18),
+                ],
               ),
-              const SizedBox(width: 8),
-              Icon(Icons.open_in_new, color: Colors.blue, size: 18),
-            ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
         const Text(
-          '© 2025 Devam Jyot Solutions',
+          '© 2025 Devamjyot Infotech',
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey,
