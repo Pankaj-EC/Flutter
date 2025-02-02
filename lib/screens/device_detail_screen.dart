@@ -244,15 +244,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   ),
                   child: const Row(
                     children: [
-                      _HeaderCell('Date', width: 110),
-                      _HeaderCell('On', width: 80),
-                      _HeaderCell('B.On', width: 70),
-                      _HeaderCell('Off', width: 70),
-                      _HeaderCell('B.Off', width: 70),
-                      _HeaderCell('9AM', width: 60),
-                      _HeaderCell('12PM', width: 60),
-                      _HeaderCell('3PM', width: 60),
-                      _HeaderCell('6PM', width: 60),
+                      _HeaderCell('Date', width: 110, icon: Icons.calendar_today),
+                      _HeaderCell('On', width: 80, icon: Icons.access_time),
+                      _HeaderCell('B.On', width: 70, icon: Icons.battery_charging_full),
+                      _HeaderCell('Off', width: 70, icon: Icons.access_time_filled),
+                      _HeaderCell('B.Off', width: 70, icon: Icons.battery_alert),
+                      _HeaderCell('9AM', width: 60, icon: Icons.show_chart),
+                      _HeaderCell('12PM', width: 60, icon: Icons.show_chart),
+                      _HeaderCell('3PM', width: 60, icon: Icons.show_chart),
+                      _HeaderCell('6PM', width: 60, icon: Icons.show_chart),
                     ],
                   ),
                 ),
@@ -556,8 +556,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 class _HeaderCell extends StatelessWidget {
   final String text;
   final double width;
+  final IconData? icon;
 
-  const _HeaderCell(this.text, {required this.width});
+  const _HeaderCell(this.text, {required this.width, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -569,14 +570,26 @@ class _HeaderCell extends StatelessWidget {
           right: BorderSide(color: Colors.green[600]!, width: 0.5),
         ),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-        textAlign: TextAlign.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null)
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 16,
+            ),
+          const SizedBox(height: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
