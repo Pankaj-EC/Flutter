@@ -7,10 +7,10 @@ class DeviceDetailScreen extends StatefulWidget {
   final Function(bool) onStatusChanged;
 
   const DeviceDetailScreen({
-    Key? key,
+    super.key,
     required this.device,
     required this.onStatusChanged,
-  }) : super(key: key);
+  });
 
   @override
   _DeviceDetailScreenState createState() => _DeviceDetailScreenState();
@@ -204,183 +204,168 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _buildDataTable() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.green[700],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+    double tableWidth =
+        110 + 80 + (70 * 3) + (60 * 4) + 40; // Dynamic column width
+    double rowHeight = 40; // Height per row
+    int rowCount = deviceData.length;
+    double maxHeight = 380; // Prevents excessive stretching
+    double tableHeight =
+        (rowHeight * rowCount).clamp(10, maxHeight); // Dynamic height
+
+    return Column(
+      children: [
+        Container(
+          width: tableWidth,
+          height: tableHeight + 80, // Adjust for header & spacing
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.15),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
-            ),
-            child: SingleChildScrollView(
-              controller: _headerScrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 610), // Sum of all column widths
-                child: Row(
-                  children: const [
-                    _HeaderCell('Date', width: 90),
-                    _HeaderCell('On', width: 70),
-                    _HeaderCell('B.On', width: 70),
-                    _HeaderCell('Off', width: 70),
-                    _HeaderCell('B.Off', width: 70),
-                    _HeaderCell('9AM', width: 60),
-                    _HeaderCell('12PM', width: 60),
-                    _HeaderCell('3PM', width: 60),
-                    _HeaderCell('6PM', width: 60),
-                  ],
+            ],
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // Enables horizontal scrolling
+            child: Column(
+              children: [
+                // Header Row
+                Container(
+                  width: tableWidth,
+                  decoration: BoxDecoration(
+                    color: Colors.green[700],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      _HeaderCell('Date', width: 110),
+                      _HeaderCell('On', width: 80),
+                      _HeaderCell('B.On', width: 70),
+                      _HeaderCell('Off', width: 70),
+                      _HeaderCell('B.Off', width: 70),
+                      _HeaderCell('9AM', width: 60),
+                      _HeaderCell('12PM', width: 60),
+                      _HeaderCell('3PM', width: 60),
+                      _HeaderCell('6PM', width: 60),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _verticalController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: SingleChildScrollView(
-                controller: _horizontalController,
-                scrollDirection: Axis.horizontal,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Container(
-                  constraints: const BoxConstraints(minWidth: 610), // Same as header
-                  child: Column(
-                    children: deviceData.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final data = entry.value;
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: index.isEven ? Colors.grey[50] : Colors.white,
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey[200]!,
-                              width: 0.5,
+                // Data Table
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _verticalController,
+                    child: Column(
+                      children: deviceData.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final data = entry.value;
+                        return Container(
+                          width: tableWidth,
+                          height: rowHeight, // Set row height
+                          decoration: BoxDecoration(
+                            color:
+                                index.isEven ? Colors.grey[50] : Colors.white,
+                            border: Border(
+                              bottom: BorderSide(
+                                  color: Colors.grey[200]!, width: 0.5),
                             ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            _DataCell(
-                              data['date'].split('T')[0],
-                              width: 90,
-                              isDate: true,
-                            ),
-                            _DataCell(
-                              data['on_Time'],
-                              width: 70,
-                              isTime: true,
-                              color: Colors.green[700],
-                            ),
-                            _DataCell(
-                              '${data['battery_Von']}V',
-                              width: 70,
-                              isBattery: true,
-                              color: Colors.blue[700],
-                            ),
-                            _DataCell(
-                              data['off_Time'],
-                              width: 70,
-                              isTime: true,
-                              color: Colors.orange[700],
-                            ),
-                            _DataCell(
-                              '${data['battery_Voff']}V',
-                              width: 70,
-                              isBattery: true,
-                              color: Colors.red[700],
-                            ),
-                            _DataCell(
-                              data['SV9AM'].toString(),
-                              width: 60,
-                              color: Colors.purple[700],
-                            ),
-                            _DataCell(
-                              data['SV12PM'].toString(),
-                              width: 60,
-                              color: Colors.purple[700],
-                            ),
-                            _DataCell(
-                              data['SV3PM'].toString(),
-                              width: 60,
-                              color: Colors.purple[700],
-                            ),
-                            _DataCell(
-                              data['SV6PM'].toString(),
-                              width: 60,
-                              color: Colors.purple[700],
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          child: Row(
+                            children: [
+                              _DataCell(data['date'].split('T')[0],
+                                  width: 110, isDate: true),
+                              _DataCell(data['on_Time'],
+                                  width: 80,
+                                  isTime: true,
+                                  color: Colors.green[700]),
+                              _DataCell('${data['battery_Von']}V',
+                                  width: 70,
+                                  isBattery: true,
+                                  color: Colors.blue[700]),
+                              _DataCell(data['off_Time'],
+                                  width: 70,
+                                  isTime: true,
+                                  color: Colors.orange[700]),
+                              _DataCell('${data['battery_Voff']}V',
+                                  width: 70,
+                                  isBattery: true,
+                                  color: Colors.red[700]),
+                              _DataCell(data['SV9AM'].toString(),
+                                  width: 60, color: Colors.purple[700]),
+                              _DataCell(data['SV12PM'].toString(),
+                                  width: 60, color: Colors.purple[700]),
+                              _DataCell(data['SV3PM'].toString(),
+                                  width: 60, color: Colors.purple[700]),
+                              _DataCell(data['SV6PM'].toString(),
+                                  width: 60, color: Colors.purple[700]),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Load More Button (Always Visible)
+        if (deviceData.isNotEmpty) // Only hide when no data at all
+          Container(
+            width: tableWidth,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Colors.grey[200]!),
+              ),
+            ),
+            child: ElevatedButton.icon(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        dataCount += 10;
+                      });
+                      fetchDeviceData();
+                    },
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.refresh,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+              label: Text(
+                isLoading ? 'Loading...' : 'Load More',
+                style: const TextStyle(fontSize: 12),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700],
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                minimumSize: const Size(120, 32),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
           ),
-          if (deviceData.length % 10 == 0 && deviceData.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.grey[200]!),
-                ),
-              ),
-              child: ElevatedButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        setState(() {
-                          dataCount += 10;
-                        });
-                        fetchDeviceData();
-                      },
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Icon(Icons.refresh, size: 16),
-                label: Text(
-                  isLoading ? 'Loading...' : 'Load More',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  minimumSize: const Size(120, 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -428,14 +413,22 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildCardRow('On Time', data['on_Time'], Icons.access_time, Colors.green[700]!),
-                _buildCardRow('Battery On', '${data['battery_Von']}V', Icons.battery_charging_full, Colors.blue[700]!),
-                _buildCardRow('Off Time', data['off_Time'], Icons.access_time_filled, Colors.orange[700]!),
-                _buildCardRow('Battery Off', '${data['battery_Voff']}V', Icons.battery_alert, Colors.red[700]!),
-                _buildCardRow('SV 9 AM', data['SV9AM'].toString(), Icons.show_chart, Colors.purple[700]!),
-                _buildCardRow('SV 12 PM', data['SV12PM'].toString(), Icons.show_chart, Colors.purple[700]!),
-                _buildCardRow('SV 3 PM', data['SV3PM'].toString(), Icons.show_chart, Colors.purple[700]!),
-                _buildCardRow('SV 6 PM', data['SV6PM'].toString(), Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('On Time', data['on_Time'], Icons.access_time,
+                    Colors.green[700]!),
+                _buildCardRow('Battery On', '${data['battery_Von']}V',
+                    Icons.battery_charging_full, Colors.blue[700]!),
+                _buildCardRow('Off Time', data['off_Time'],
+                    Icons.access_time_filled, Colors.orange[700]!),
+                _buildCardRow('Battery Off', '${data['battery_Voff']}V',
+                    Icons.battery_alert, Colors.red[700]!),
+                _buildCardRow('SV 9 AM', data['SV9AM'].toString(),
+                    Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 12 PM', data['SV12PM'].toString(),
+                    Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 3 PM', data['SV3PM'].toString(),
+                    Icons.show_chart, Colors.purple[700]!),
+                _buildCardRow('SV 6 PM', data['SV6PM'].toString(),
+                    Icons.show_chart, Colors.purple[700]!),
               ],
             ),
           ),
@@ -482,8 +475,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.warning_rounded,
-                size: 64, color: Colors.orange[300]),
+            Icon(Icons.warning_rounded, size: 64, color: Colors.orange[300]),
             const SizedBox(height: 16),
             const Text(
               '📅 No Data Available',
@@ -515,17 +507,20 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ElevatedButton.icon(
-                onPressed: isLoading ? null : () {
-                  setState(() => dataCount += 10);
-                  fetchDeviceData();
-                },
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        setState(() => dataCount += 10);
+                        fetchDeviceData();
+                      },
                 icon: isLoading
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Icon(Icons.refresh),
@@ -533,7 +528,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
