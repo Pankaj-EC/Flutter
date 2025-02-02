@@ -204,19 +204,17 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _buildDataTable() {
-    double tableWidth =
-        110 + 80 + (70 * 3) + (60 * 4) + 40; // Dynamic column width
-    double rowHeight = 40; // Height per row
+    double tableWidth = 110 + 80 + (70 * 3) + (60 * 4) + 40;
+    double rowHeight = 40;
     int rowCount = deviceData.length;
-    double maxHeight = 380; // Prevents excessive stretching
-    double tableHeight =
-        (rowHeight * rowCount).clamp(10, maxHeight); // Dynamic height
+    double maxHeight = 380;
+    double tableHeight = (rowHeight * rowCount).clamp(10, maxHeight);
 
     return Column(
       children: [
         Container(
           width: tableWidth,
-          height: tableHeight + 80, // Adjust for header & spacing
+          height: tableHeight + 80,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -231,7 +229,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ],
           ),
           child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // Enables horizontal scrolling
+            scrollDirection: Axis.horizontal,
             child: Column(
               children: [
                 // Header Row
@@ -316,23 +314,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ),
           ),
         ),
-        // Load More Button (Always Visible)
-        if (deviceData.isNotEmpty) // Only hide when no data at all
+        // Load More Button (Full Width)
+        if (deviceData.isNotEmpty && deviceData.length % 10 == 0)
           Container(
-            width: tableWidth,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Colors.grey[200]!),
-              ),
-            ),
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: ElevatedButton.icon(
               onPressed: isLoading
                   ? null
                   : () {
-                      setState(() {
-                        dataCount += 10;
-                      });
+                      setState(() => dataCount += 10);
                       fetchDeviceData();
                     },
               icon: isLoading
@@ -344,23 +335,17 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Icon(
-                      Icons.refresh,
-                      size: 16,
-                      color: Colors.white,
-                    ),
+                  : const Icon(Icons.refresh, size: 16),
               label: Text(
-                isLoading ? 'Loading...' : 'Load More',
-                style: const TextStyle(fontSize: 12),
+                isLoading ? 'Loading...' : 'Load More Data',
+                style: const TextStyle(fontSize: 14),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[700],
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                minimumSize: const Size(120, 32),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
